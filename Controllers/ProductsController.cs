@@ -27,6 +27,16 @@ namespace HPlusSportApi.Controllers
             return Ok(products);
 
         }
+        [HttpPost]
+        public async Task<ActionResult<Product>> PostProducts([FromBody] Product product)
+        {
+            shopContext.Products.Add(product);
+            await shopContext.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
+
+        }
+
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
@@ -36,6 +46,35 @@ namespace HPlusSportApi.Controllers
                 return NotFound();
             }
             return Ok(product);
+        }
+        [HttpPut("{id}")]
+        public async Task<ActionResult> PutProduct(int id, [FromBody] Product productToUpdate)
+        {
+            if (id != productToUpdate.Id)
+            {
+                return BadRequest();
+            }
+            if (!shopContext.Products.Any(p => p.Id == productToUpdate.Id))
+            {
+                return NotFound();
+            }
+            shopContext.Entry(productToUpdate).State = EntityState.Modified;
+
+            await shopContext.SaveChangesAsync();
+            return NoContent();
+        }
+        [HttpDelete]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+
+            var product = await shopContext.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            shopContext.Products.Remove(product);
+            await shopContext.SaveChangesAsync();   
+            return NoContent();
         }
     }
 }
